@@ -47,3 +47,9 @@ packages/
 # Publish
 # ===============================
 publish/
+# ===============================
+# App settings (API keys)
+# ===============================
+appsettings.json
+appsettings.Development.json
+appsettings.Production.json
