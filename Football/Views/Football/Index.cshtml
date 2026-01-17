@@ -1,0 +1,298 @@
+﻿@model IReadOnlyList<Football.Application.DTOs.MatchDto>
+
+@{
+    ViewData["Title"] = "Bugünkü Oyunlar";
+    Layout = "_Layout";
+
+    // Top 5: England, Spain, Italy, Germany, France
+    var topLeagueOrder = new (int Id, string Name)[] {
+        (39,  "Premier League"),
+        (140, "La Liga"),
+        (135, "Serie A"),
+        (78,  "Bundesliga"),
+        (61,  "Ligue 1")
+    };
+
+    var topLeagueIds = topLeagueOrder.Select(x => x.Id).ToHashSet();
+
+    // Featured: top liqalardan ilk 5 oyun (real görünüş üçün)
+    var featuredMatches = Model
+        .Where(m => topLeagueIds.Contains(m.LeagueId))
+        .OrderBy(m => m.MatchDate)
+        .Take(5)
+        .ToList();
+
+    // Digərləri: featured çıxılmaqla
+    var remaining = Model.Except(featuredMatches).OrderBy(m => m.MatchDate).ToList();
+
+    // Top 5 liqaları ardıcıllıqla qrupla
+    var topLeagueGroups = topLeagueOrder
+        .Select(x => new
+        {
+            LeagueId = x.Id,
+            LeagueName = x.Name,
+            Matches = remaining.Where(m => m.LeagueId == x.Id).ToList()
+        })
+        .Where(g => g.Matches.Any())  // boşdursa KEÇ
+        .ToList();
+
+    // Digər liqalar (qalan hamısı)
+    var otherMatches = remaining.Where(m => !topLeagueIds.Contains(m.LeagueId)).ToList();
+}
+
+<style>
+    .match-row:hover {
+        box-shadow: 0 6px 18px rgba(0,0,0,.08);
+        transform: translateY(-1px);
+        transition: .15s;
+    }
+
+    .team-logo {
+        width: 22px;
+        height: 22px;
+        object-fit: contain;
+        margin-right: 8px;
+    }
+
+    .league-badge {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .league-logo {
+        width: 18px;
+        height: 18px;
+        object-fit: contain;
+    }
+
+    .pred-pill {
+        display: inline-block;
+        padding: .2rem .55rem;
+        border-radius: 999px;
+        font-size: .80rem;
+    }
+</style>
+
+<h3 class="mb-4">📅 Bugünkü Oyunlar</h3>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">Bu gün üçün oyun tapılmadı.</div>
+}
+else
+{
+    <!-- ⭐ FEATURED -->
+    @if (featuredMatches.Any())
+    {
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h4 class="mb-0">⭐ Məşhur Oyunlar</h4>
+            <span class="text-muted small">Top 5 liqadan seçilmiş</span>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="table-responsive">
+                <table class="table table-sm table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:90px;">Saat</th>
+                            <th>Ev</th>
+                            <th style="width:40px;" class="text-center"> </th>
+                            <th>Qonaq</th>
+                            <th style="width:240px;">Analiz nəticəsi</th>
+                            <th style="width:190px;" class="text-end"> </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var m in featuredMatches)
+                        {
+                            <tr class="match-row" data-match-id="@m.MatchId">
+                                <td class="text-muted">@m.MatchDate.ToString("HH:mm")</td>
+
+                                <td>
+                                    <img class="team-logo" src="@m.HomeLogoUrl" alt="" onerror="this.style.display='none';" />
+                                    <strong>@m.HomeTeam</strong>
+                                </td>
+
+                                <td class="text-center text-muted">vs</td>
+
+                                <td>
+                                    <img class="team-logo" src="@m.AwayLogoUrl" alt="" onerror="this.style.display='none';" />
+                                    <strong>@m.AwayTeam</strong>
+                                </td>
+
+                                <td>
+                                    <span class="text-muted small quick-pred">Yüklənir...</span>
+                                </td>
+
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-primary"
+                                            onclick="openMatchDetails(@m.MatchId)">
+                                        Bütün analizlərə bax
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    <!-- 🏆 TOP 5 LEAGUES (ardıcıllıqla, boş olanlar keçilir) -->
+    @foreach (var g in topLeagueGroups)
+    {
+        <div class="d-flex justify-content-between align-items-center mb-2 mt-4">
+            <div class="league-badge">
+                @{
+                    // league logo/name MatchDto-dan gəlirsə, ilk matçdan götürürük
+                    var any = g.Matches.First();
+                    var leagueName = string.IsNullOrWhiteSpace(any.LeagueName) ? g.LeagueName : any.LeagueName;
+                    var leagueLogo = any.LeagueLogoUrl;
+                }
+                @if (!string.IsNullOrWhiteSpace(leagueLogo))
+                {
+                    <img class="league-logo" src="@leagueLogo" alt="" onerror="this.style.display='none';" />
+                }
+                <h4 class="mb-0">🏆 @leagueName</h4>
+                <span class="text-muted small">(@g.Matches.Count oyun)</span>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-3">
+            <div class="table-responsive">
+                <table class="table table-sm table-striped align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:90px;">Saat</th>
+                            <th>Ev</th>
+                            <th style="width:40px;" class="text-center"> </th>
+                            <th>Qonaq</th>
+                            <th style="width:240px;">Analiz nəticəsi</th>
+                            <th style="width:190px;" class="text-end"> </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var m in g.Matches)
+                        {
+                            <tr class="match-row" data-match-id="@m.MatchId">
+                                <td class="text-muted">@m.MatchDate.ToString("HH:mm")</td>
+
+                                <td>
+                                    <img class="team-logo" src="@m.HomeLogoUrl" alt="" onerror="this.style.display='none';" />
+                                    @m.HomeTeam
+                                </td>
+
+                                <td class="text-center text-muted">vs</td>
+
+                                <td>
+                                    <img class="team-logo" src="@m.AwayLogoUrl" alt="" onerror="this.style.display='none';" />
+                                    @m.AwayTeam
+                                </td>
+
+                                <td>
+                                    <span class="text-muted small quick-pred">Yüklənir...</span>
+                                </td>
+
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-primary"
+                                            onclick="openMatchDetails(@m.MatchId)">
+                                        Bütün analizlərə bax
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    <!-- 🌍 OTHERS -->
+    @if (otherMatches.Any())
+    {
+        <h4 class="mt-4 mb-2">🌍 Digər Liqalar</h4>
+
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-sm align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width:90px;">Saat</th>
+                            <th>Ev</th>
+                            <th style="width:40px;" class="text-center"> </th>
+                            <th>Qonaq</th>
+                            <th style="width:240px;">Analiz nəticəsi</th>
+                            <th style="width:190px;" class="text-end"> </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var m in otherMatches)
+                        {
+                            <tr class="match-row" data-match-id="@m.MatchId">
+                                <td class="text-muted">@m.MatchDate.ToString("HH:mm")</td>
+                                <td>
+                                    <img class="team-logo" src="@m.HomeLogoUrl" alt="" onerror="this.style.display='none';" />
+                                    @m.HomeTeam
+                                </td>
+                                <td class="text-center text-muted">vs</td>
+                                <td>
+                                    <img class="team-logo" src="@m.AwayLogoUrl" alt="" onerror="this.style.display='none';" />
+                                    @m.AwayTeam
+                                </td>
+                                <td>
+                                    <span class="text-muted small quick-pred">Yüklənir...</span>
+                                </td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-secondary"
+                                            onclick="openMatchDetails(@m.MatchId)">
+                                        Bütün analizlərə bax
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}
+
+@section Scripts {
+    <script src="~/admin/js/site.js"></script>
+    <script>
+        // Index yüklənəndə hər matç üçün "quick analysis preview" gətirək
+        // (Details partial-ın içindən "ən uyğun variant" textini çıxaracağıq və sonda daha yaxşı edəcəyik)
+        document.addEventListener("DOMContentLoaded", () => {
+            const rows = document.querySelectorAll("tr.match-row");
+
+            rows.forEach(r => {
+                const matchId = r.getAttribute("data-match-id");
+                const target = r.querySelector(".quick-pred");
+
+                fetch(`/Football/Details?matchId=${matchId}`)
+                    .then(res => {
+                        if (!res.ok) throw new Error();
+                        return res.text();
+                    })
+                    .then(html => {
+                        // Sadə preview: partial-dan bir data attribute oxuya bilərik.
+                        // İndilik: əgər partial-da <div data-main="BTTS YES - 68%"></div> kimi element qoysaq burdan çəkəcəyik.
+                        const temp = document.createElement("div");
+                        temp.innerHTML = html;
+
+                        const main = temp.querySelector("[data-main-pick]");
+                        if (main) {
+                            const text = main.getAttribute("data-main-pick");
+                            target.innerHTML = `<span class="pred-pill bg-success text-white">${text}</span>`;
+                        } else {
+                            target.textContent = "Analiz mövcud deyil";
+                        }
+                    })
+                    .catch(() => {
+                        target.textContent = "Analiz mövcud deyil";
+                    });
+            });
+        });
+    </script>
+}

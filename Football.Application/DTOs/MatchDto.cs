@@ -7,15 +7,34 @@ using System.Threading.Tasks;
 namespace Football.Application.DTOs
 {
     public class MatchDto
-    {// Liqa məlumatı (SIDEBAR üçün VACİBDİR)
-        public int LeagueId { get; set; }
-        public int HomeTeamId { get; set; }
-        public int AwayTeamId { get; set; }
+    {
         public int MatchId { get; set; }
-        public string HomeTeam { get; set; } = string.Empty;
-        public string AwayTeam { get; set; } = string.Empty;
+
+        // League
+        public int LeagueId { get; set; }
+        public string LeagueName { get; set; } = null!;
+        public string LeagueLogoUrl { get; set; } = null!;
+
+        // Teams
+        public int HomeTeamId { get; set; }
+        public string HomeTeam { get; set; } = null!;
+        public string HomeLogoUrl { get; set; } = null!;
+
+        public int AwayTeamId { get; set; }
+        public string AwayTeam { get; set; } = null!;
+        public string AwayLogoUrl { get; set; } = null!;
+
         public DateTime MatchDate { get; set; }
 
+        // Prediction Preview (Index üçün)
+        public bool HasPrediction { get; set; }
+        public string? MainPickLabel { get; set; }            // "BTTS YES"
+        public double? MainPickProbability { get; set; }      // 68.0
+
+        // UI əlavə rahatlıq (istəsən)
+        public string? MainPickText => HasPrediction && MainPickLabel != null && MainPickProbability != null
+            ? $"{MainPickLabel} • {MainPickProbability:0}%"
+            : null;
     }
 
 }

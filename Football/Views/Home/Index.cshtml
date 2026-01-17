@@ -1,4 +1,6 @@
-﻿@{
+﻿@model Football.ViewModels.HomeVm
+
+@{
     ViewData["Title"] = "Home";
     Layout = "_Layout";
 }
@@ -14,38 +16,49 @@
                 </h3>
 
                 <p class="text-muted">
-                    Bu sistem müxtəlif data provider-lərdən (odds, tarixçə, AI)
-                    istifadə edərək futbol oyunları üçün ən uyğun ehtimalları hesablayır.
+                    Bu sistem real vaxtlı məlumatlar, statistik analiz
+                    və AI alqoritmləri əsasında futbol oyunları üçün
+                    ən uyğun ehtimalları hesablayır.
                 </p>
 
                 <hr />
 
+                <!-- STAT CARDS -->
                 <div class="row text-center">
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="border rounded p-3">
                             <h5>📅 Bugünkü Oyunlar</h5>
-                            <p class="text-muted mb-0">
-                                Bu gün keçiriləcək oyunların siyahısı
-                            </p>
+                            <h3 class="fw-bold">
+                                @Model.TodayMatchCount
+                            </h3>
                         </div>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="border rounded p-3">
                             <h5>🔴 Canlı Oyunlar</h5>
-                            <p class="text-muted mb-0">
-                                Hal-hazırda davam edən matçlar
-                            </p>
+                            <h3 class="fw-bold text-danger">
+                                @Model.LiveMatchCount
+                            </h3>
                         </div>
                     </div>
 
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <div class="border rounded p-3">
-                            <h5>🤖 AI Proqnoz</h5>
-                            <p class="text-muted mb-0">
-                                Statistik və AI əsaslı analizlər
-                            </p>
+                            <h5>🏆 Aktiv Liqalar</h5>
+                            <h3 class="fw-bold">
+                                @Model.LeagueCount
+                            </h3>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="border rounded p-3">
+                            <h5>🤖 Proqnozlar</h5>
+                            <h3 class="fw-bold">
+                                @Model.PredictionCount
+                            </h3>
                         </div>
                     </div>
 
@@ -53,6 +66,7 @@
 
                 <hr />
 
+                <!-- CTA -->
                 <div class="mt-3">
                     <a asp-controller="Football"
                        asp-action="Index"

@@ -1,42 +1,65 @@
 ﻿@model Football.ViewModels.SidebarVm
 
-<aside class="bg-dark text-white p-3" style="width:270px">
+<aside class="bg-dark text-white p-3" style="width:260px">
 
-    <h4 class="mb-4 fw-bold">⚽ Football AI</h4>
+    <!-- LOGO -->
+    <div class="text-center mb-4">
+        <img src="~/admin/images/logom.png"
+             alt="Football AI"
+             style="max-width:120px" />
+    </div>
 
     <ul class="nav nav-pills flex-column gap-2">
 
-        <!-- BUGÜNKÜ OYUNLAR -->
+        <!-- HOME -->
+        <li class="nav-item">
+            <a class="nav-link text-white"
+               asp-controller="Home"
+               asp-action="Index">
+                <i class="fa fa-home me-2"></i>
+                Home
+            </a>
+        </li>
+
+        <!-- TODAY MATCHES -->
         <li class="nav-item">
             <a class="nav-link text-white d-flex justify-content-between align-items-center"
                asp-controller="Football"
                asp-action="Index">
-                📅 Bugünkü Oyunlar
-                <span class="badge bg-secondary rounded-pill">
+                <span>
+                    <i class="fa fa-calendar me-2"></i>
+                    Bugünkü Oyunlar
+                </span>
+
+                <span class="badge bg-secondary">
                     @Model.TodayMatchCount
                 </span>
             </a>
         </li>
 
-        <!-- CANLI OYUNLAR -->
+        <!-- LIVE MATCHES -->
         <li class="nav-item">
             <a class="nav-link text-white d-flex justify-content-between align-items-center"
                asp-controller="Football"
                asp-action="Live">
-                🔴 Canlı Oyunlar
+                <span>
+                    <i class="fa fa-circle text-danger me-2"></i>
+                    Canlı Oyunlar
+                </span>
+
                 @if (Model.LiveMatchCount > 0)
                 {
-                    <span class="badge bg-danger rounded-pill">
+                    <span class="badge bg-danger">
                         @Model.LiveMatchCount
                     </span>
                 }
             </a>
         </li>
 
-        <!-- LİQALAR -->
+        <!-- LEAGUES -->
         <li class="nav-item mt-3">
             <span class="text-uppercase text-secondary small ps-2">
-                🏆 Liqalar
+                Liqalar
             </span>
         </li>
 
@@ -48,11 +71,14 @@
                    asp-action="League"
                    asp-route-leagueId="@league.LeagueId">
 
-                    <span>@league.LeagueName</span>
+                    <span>
+                        <i class="fa fa-trophy me-2"></i>
+                        @league.LeagueName
+                    </span>
 
                     @if (league.LiveMatchCount > 0)
                     {
-                        <span class="badge bg-danger rounded-pill">
+                        <span class="badge bg-danger">
                             @league.LiveMatchCount
                         </span>
                     }
@@ -61,6 +87,5 @@
         }
 
     </ul>
-</aside>
 
-}
+</aside>

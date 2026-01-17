@@ -16,8 +16,9 @@ obj/
 **/obj/
 
 # ===============================
-# ASP.NET Core
+# ASP.NET Core - AppSettings (API Keys)
 # ===============================
+appsettings.json
 appsettings.Development.json
 appsettings.Production.json
 
@@ -47,9 +48,3 @@ packages/
 # Publish
 # ===============================
 publish/
-# ===============================
-# App settings (API keys)
-# ===============================
-appsettings.json
-appsettings.Development.json
-appsettings.Production.json
