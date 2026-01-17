@@ -1,0 +1,66 @@
+﻿@model Football.ViewModels.SidebarVm
+
+<aside class="bg-dark text-white p-3" style="width:270px">
+
+    <h4 class="mb-4 fw-bold">⚽ Football AI</h4>
+
+    <ul class="nav nav-pills flex-column gap-2">
+
+        <!-- BUGÜNKÜ OYUNLAR -->
+        <li class="nav-item">
+            <a class="nav-link text-white d-flex justify-content-between align-items-center"
+               asp-controller="Football"
+               asp-action="Index">
+                📅 Bugünkü Oyunlar
+                <span class="badge bg-secondary rounded-pill">
+                    @Model.TodayMatchCount
+                </span>
+            </a>
+        </li>
+
+        <!-- CANLI OYUNLAR -->
+        <li class="nav-item">
+            <a class="nav-link text-white d-flex justify-content-between align-items-center"
+               asp-controller="Football"
+               asp-action="Live">
+                🔴 Canlı Oyunlar
+                @if (Model.LiveMatchCount > 0)
+                {
+                    <span class="badge bg-danger rounded-pill">
+                        @Model.LiveMatchCount
+                    </span>
+                }
+            </a>
+        </li>
+
+        <!-- LİQALAR -->
+        <li class="nav-item mt-3">
+            <span class="text-uppercase text-secondary small ps-2">
+                🏆 Liqalar
+            </span>
+        </li>
+
+        @foreach (var league in Model.Leagues)
+        {
+            <li class="nav-item">
+                <a class="nav-link text-white d-flex justify-content-between align-items-center"
+                   asp-controller="Football"
+                   asp-action="League"
+                   asp-route-leagueId="@league.LeagueId">
+
+                    <span>@league.LeagueName</span>
+
+                    @if (league.LiveMatchCount > 0)
+                    {
+                        <span class="badge bg-danger rounded-pill">
+                            @league.LiveMatchCount
+                        </span>
+                    }
+                </a>
+            </li>
+        }
+
+    </ul>
+</aside>
+
+}
